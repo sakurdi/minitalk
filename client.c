@@ -12,6 +12,8 @@
 
 #include "minitalk.h"
 
+unsigned char *g;
+
 int	ft_atoi(const char *s)
 {
 	int	res;
@@ -32,29 +34,45 @@ int	ft_atoi(const char *s)
 	return (res * sign);
 }
 
-void	send_str_bits(int pid, char *s)
+void sig_handler(int signum, siginfo_t *info, void *ctx)
+{
+	(void)ctx;
+	if(signum == SIGUSR1)
+	{
+		ft_printf("signal successfully recieved by the server\n");
+		if(*++g)
+		{
+			ft_printf("global var value %c\n", *g);
+			send_str_bits(info->si_pid, *g);
+		}
+		else
+		{
+			ft_printf("Nothing left to send\n");
+			exit(EXIT_SUCCESS);
+		}
+	}
+}
+
+void	send_str_bits(int pid, unsigned char c)
 {
 	int	bit;
 
 	bit = 7;
-	while (*s)
-	{
 		while (bit >= 0)
 		{
-			if ((*s >> bit) & 1)
+			if ((c >> bit) & 1)
 				kill(pid, SIGUSR1);
 			else
 				kill(pid, SIGUSR2);
 			bit--;
-			usleep(50);
+			usleep(100);
 		}
-		s++;
-		bit = 7;
-	}
 }
 
 int	main(int ac, char **av)
 {
+	struct sigaction sigact;
+
 	if (ac != 3)
 	{
 		ft_printf("too few/too many arguments\n");
@@ -65,6 +83,13 @@ int	main(int ac, char **av)
 		ft_printf("empty string argument\n");
 		exit(EXIT_FAILURE);
 	}
-	send_str_bits(ft_atoi(av[1]), av[2]);
+	sigact.sa_sigaction = sig_handler;
+	sigact.sa_flags = SA_SIGINFO;
+	sigaction(SIGUSR1, &sigact, NULL);
+	g = (unsigned char *)av[2];
+	ft_printf("AV2 BEFORE ANY CALL %s\n", g);
+	send_str_bits(ft_atoi(av[1]), *g);
+	while(1)
+		pause();
 	return (0);
 }

@@ -16,19 +16,27 @@ void	sig_handler(int signum, siginfo_t *info, void *context)
 {
 	static int				bit = 0;
 	static unsigned char	c = 0;
-
+	static pid_t			client_pid = 0;
+	
 	(void)context;
-	(void)info;
+	if(!client_pid)
+		client_pid = info->si_pid;
+	ft_printf("recieved signal %d from %d\n", info->si_signo, client_pid);
 	if (signum == SIGUSR1)
+	{
 		c = c | 1;
+		kill(client_pid, SIGUSR1);
+	}
 	else
+	{
 		c = c | 0;
+		kill(client_pid, SIGUSR1);
+	}
 	if (++bit == 8)
 	{	
 		bit = 0;
-		if (!c)
-			return ;
-		ft_printf("%c", c);
+		client_pid = 0;
+		ft_printf("8 bit representation -> %c\n", c);
 		c = 0;
 	}
 	else
@@ -43,6 +51,7 @@ int	main(void)
 	pid = getpid();
 	ft_printf("server PID -> %d\n", pid);
 	sigact.sa_sigaction = sig_handler;
+	sigact.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sigact, NULL);
 	sigaction(SIGUSR2, &sigact, NULL);
 	while (1)
