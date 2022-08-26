@@ -18,7 +18,6 @@ void	sig_handler(int signum, siginfo_t *info, void *context)
 	static unsigned char	c = 0;
 	
 	(void)context;
-	ft_printf("recieved signal %d from %d\n", info->si_signo, info->si_pid);
 	if (signum == SIGUSR1)
 		c = c | 1;
 	else
@@ -26,7 +25,7 @@ void	sig_handler(int signum, siginfo_t *info, void *context)
 	if (++bit == 8)
 	{	
 		bit = 0;
-		ft_printf("8 bit representation -> %c\n", c);
+		ft_printf("%c", c);
 		c = 0;
 	}
 	else

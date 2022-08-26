@@ -9,6 +9,7 @@ CFLAGS = -Wall -Werror -Wextra
 
 all: printf client server
 $(NAME): all
+bonus: printf client server
 server: server.o 
 	$(CC) $(CFLAGS) -o $@ $< $(PRINTF_LIB)
 client: client.o 

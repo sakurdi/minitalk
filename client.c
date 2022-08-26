@@ -37,14 +37,10 @@ int	ft_atoi(const char *s)
 void sig_handler(int signum, siginfo_t *info, void *ctx)
 {
 	(void)ctx;
-	if(!g)
-	{
-		ft_printf("Nothing left to do\n");
-		exit(EXIT_SUCCESS);
-	}
+
 	if(signum == SIGUSR1)
 	{
-		ft_printf("signal successfully recieved by the server[%d]\n", info->si_pid);
+		ft_printf("[%d] signal successfuly recieved by the server\n", info->si_pid);
 		send_str_bits(info->si_pid);
 	}
 }
@@ -56,6 +52,11 @@ void	send_str_bits(int pid)
 	if(bit == -1)
 	{
 		g++;
+		if(!*g)
+		{
+			ft_printf("Nothing left to send. Quitting\n");
+			exit(EXIT_SUCCESS);
+		}
 		bit = 7;
 	}
 	if ((*g >> bit) & 1)
@@ -90,7 +91,7 @@ int	main(int ac, char **av)
 	sigact.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sigact, NULL);
 	g = (unsigned char *)av[2];
-	ft_printf("AV2 BEFORE ANY CALL %c\n", *g);
+	ft_printf("AV2 BEFORE ANY CALL %s\n", g);
 	send_str_bits(ft_atoi(av[1]));
 	while(1)
 		pause();
