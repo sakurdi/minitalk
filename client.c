@@ -37,36 +37,39 @@ int	ft_atoi(const char *s)
 void sig_handler(int signum, siginfo_t *info, void *ctx)
 {
 	(void)ctx;
+	if(!g)
+	{
+		ft_printf("Nothing left to do\n");
+		exit(EXIT_SUCCESS);
+	}
 	if(signum == SIGUSR1)
 	{
-		ft_printf("signal successfully recieved by the server\n");
-		if(*++g)
-		{
-			ft_printf("global var value %c\n", *g);
-			send_str_bits(info->si_pid, *g);
-		}
-		else
-		{
-			ft_printf("Nothing left to send\n");
-			exit(EXIT_SUCCESS);
-		}
+		ft_printf("signal successfully recieved by the server[%d]\n", info->si_pid);
+		send_str_bits(info->si_pid);
 	}
 }
 
-void	send_str_bits(int pid, unsigned char c)
+void	send_str_bits(int pid)
 {
-	int	bit;
-
-	bit = 7;
-		while (bit >= 0)
-		{
-			if ((c >> bit) & 1)
-				kill(pid, SIGUSR1);
-			else
-				kill(pid, SIGUSR2);
-			bit--;
-			usleep(100);
-		}
+	static int	bit = 7;
+	
+	if(bit == -1)
+	{
+		g++;
+		bit = 7;
+	}
+	if ((*g >> bit) & 1)
+	{
+		bit--;
+    	kill(pid, SIGUSR1);
+		return ;
+	}
+    else
+	{	
+		bit--;
+    	kill(pid, SIGUSR2);
+		return ;
+	}
 }
 
 int	main(int ac, char **av)
@@ -87,8 +90,8 @@ int	main(int ac, char **av)
 	sigact.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sigact, NULL);
 	g = (unsigned char *)av[2];
-	ft_printf("AV2 BEFORE ANY CALL %s\n", g);
-	send_str_bits(ft_atoi(av[1]), *g);
+	ft_printf("AV2 BEFORE ANY CALL %c\n", *g);
+	send_str_bits(ft_atoi(av[1]));
 	while(1)
 		pause();
 	return (0);
