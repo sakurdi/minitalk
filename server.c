@@ -16,7 +16,7 @@ void	sig_handler(int signum, siginfo_t *info, void *context)
 {
 	static int				bit = 0;
 	static unsigned char	c = 0;
-	
+
 	(void)context;
 	if (signum == SIGUSR1)
 		c = c | 1;

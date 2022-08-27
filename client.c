@@ -12,7 +12,7 @@
 
 #include "minitalk.h"
 
-unsigned char *g;
+unsigned char	*g_str;
 
 int	ft_atoi(const char *s)
 {
@@ -34,13 +34,12 @@ int	ft_atoi(const char *s)
 	return (res * sign);
 }
 
-void sig_handler(int signum, siginfo_t *info, void *ctx)
+void	sig_handler(int signum, siginfo_t *info, void *ctx)
 {
 	(void)ctx;
-
-	if(signum == SIGUSR1)
+	if (signum == SIGUSR1)
 	{
-		ft_printf("[%d] signal successfuly recieved by the server\n", info->si_pid);
+		ft_printf("signal recieved by the server\n");
 		send_str_bits(info->si_pid);
 	}
 }
@@ -48,34 +47,34 @@ void sig_handler(int signum, siginfo_t *info, void *ctx)
 void	send_str_bits(int pid)
 {
 	static int	bit = 7;
-	
-	if(bit == -1)
+
+	if (bit == -1)
 	{
-		g++;
-		if(!*g)
+		g_str++;
+		if (!*g_str)
 		{
 			ft_printf("Nothing left to send. Quitting\n");
 			exit(EXIT_SUCCESS);
 		}
 		bit = 7;
 	}
-	if ((*g >> bit) & 1)
+	if ((*g_str >> bit) & 1)
 	{
 		bit--;
-    	kill(pid, SIGUSR1);
+		kill(pid, SIGUSR1);
 		return ;
 	}
-    else
+	else
 	{	
 		bit--;
-    	kill(pid, SIGUSR2);
+		kill(pid, SIGUSR2);
 		return ;
 	}
 }
 
 int	main(int ac, char **av)
 {
-	struct sigaction sigact;
+	struct sigaction	sigact;
 
 	if (ac != 3)
 	{
@@ -90,10 +89,10 @@ int	main(int ac, char **av)
 	sigact.sa_sigaction = sig_handler;
 	sigact.sa_flags = SA_SIGINFO;
 	sigaction(SIGUSR1, &sigact, NULL);
-	g = (unsigned char *)av[2];
+	g_str = (unsigned char *)av[2];
 	ft_printf("AV2 BEFORE ANY CALL %s\n", g);
 	send_str_bits(ft_atoi(av[1]));
-	while(1)
+	while (1)
 		pause();
 	return (0);
 }

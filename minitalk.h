@@ -19,5 +19,5 @@
 # include <unistd.h>
 
 size_t	ft_printf(char *s, ...);
-void    send_str_bits(int pid);
+void	send_str_bits(int pid);
 #endif
